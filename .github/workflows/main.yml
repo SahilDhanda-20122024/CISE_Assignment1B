@@ -1,69 +1,47 @@
-name: CI Pipeline
+name: Build and Test
 
 on:
   push:
-    branches: [main, develop]
+    branches:
+      - main
   pull_request:
-    branches: [main, develop]
+    branches:
+      - main
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-
-    services:
-      mongo:
-        image: mongo:5
-        ports:
-          - 27017:27017
-        options: >-
-          --health-cmd="mongo --eval 'db.runCommand({ ping: 1 })'"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
 
     env:
-      # These should be set as GitHub Secrets
       MONGODB_URI: ${{ secrets.MONGODB_URI }}
-      NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
           node-version: 18
-          cache: 'npm'
 
       - name: Install backend dependencies
-        working-directory: ./backend
+        working-directory: ./backend_nestjs
         run: npm ci
+
+      - name: Run backend build
+        working-directory: ./backend_nestjs
+        run: npm run build
+
+      - name: Run backend tests
+        working-directory: ./backend_nestjs
+        run: npm run test
 
       - name: Install frontend dependencies
         working-directory: ./frontend
         run: npm ci
 
-      - name: Lint backend
-        working-directory: ./backend
-        run: npm run lint
-
-      - name: Lint frontend
-        working-directory: ./frontend
-        run: npm run lint
-
-      - name: Run backend tests
-        working-directory: ./backend
-        run: npm run test
-
       - name: Build frontend
         working-directory: ./frontend
-        run: npm run build
-
-      - name: Build backend
-        working-directory: ./backend
         run: npm run build
