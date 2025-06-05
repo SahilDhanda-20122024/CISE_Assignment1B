@@ -21,9 +21,10 @@ export class ArticleService {
     return this.articleModel.findById(id).exec();
   }
 
-  async update(id: string, article: Partial<Article>): Promise<Article | null> {
-    return this.articleModel.findByIdAndUpdate(id, article, { new: true });
+  async update(id: string, updateData: Partial<Article>): Promise<Article | null> {
+    return this.articleModel.findByIdAndUpdate(id, updateData, { new: true });
   }
+
 
   async delete(id: string): Promise<Article | null> {
     return this.articleModel.findByIdAndDelete(id);

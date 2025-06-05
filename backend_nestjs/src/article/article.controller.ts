@@ -26,12 +26,8 @@ export class ArticleController {
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() article: Partial<Article>): Promise<Article> {
-    const updated = await this.articleService.update(id, article);
-    if (!updated) {
-      throw new NotFoundException(`Article with ID ${id} not found`);
-    }
-    return updated;
+    async update(@Param('id') id: string, @Body() updateData: Partial<Article>): Promise<Article | null> {
+  return this.articleService.update(id, updateData);
   }
 
   @Delete(':id')
