@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { fetchArticles, updateArticle } from '../utils/api';
 
-const researchTypes = ['Controlled Experiment', 'Case Study', 'Survey', 'Meta-Analysis'];
+const researchTypes = ['Controlled Experiment', 'Case Study', 'Survey', 'Literature Review', 'Meta-Analysis'];
 const results = ['Supports Claim', 'Does Not Support Claim', 'Inconclusive'];
 const participantTypes = ['Professional Developers', 'Students', 'Mixed'];
 
@@ -42,12 +43,46 @@ export default function AnalyzePage() {
   return (
     <div style={{ padding: '20px' }}>
       <h1>Analyze Approved Articles</h1>
+
+      <Link href="/" passHref>
+        <button style={{ marginBottom: '20px' }}>← Back to Home</button>
+      </Link>
+
       {articles.length === 0 ? (
         <p>No approved articles to analyze.</p>
       ) : (
         articles.map((article, index) => (
-          <div key={article._id} style={{ border: '1px solid #ccc', padding: '10px', marginBottom: '15px' }}>
+          <div
+            key={article._id}
+            style={{
+              border: '1px solid #ccc',
+              padding: '15px',
+              marginBottom: '15px',
+              borderRadius: '6px',
+              background: '#fafafa',
+            }}
+          >
             <p><strong>{article.title}</strong> by {article.authors}</p>
+            <p>
+              <em>{article.journal}</em> — {article.year || 'Year N/A'}
+              {article.volume && `, Vol. ${article.volume}`}
+              {article.number && `, No. ${article.number}`}
+            </p>
+            <p>Pages: {article.pages || 'N/A'}</p>
+            <p>
+              DOI: {article.doi ? (
+                <a
+                  href={`https://doi.org/${article.doi}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: 'blue' }}
+                >
+                  {article.doi}
+                </a>
+              ) : 'N/A'}
+            </p>
+            <p><strong>SE Practice:</strong> {article.sePractice || 'N/A'}</p>
+            <p><strong>Claim:</strong> {article.claim || 'N/A'}</p>
 
             <label>Result: </label>
             <select

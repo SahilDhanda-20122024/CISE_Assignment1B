@@ -40,20 +40,45 @@ export async function updateArticle(id: string, updatedData: any) {
   return await res.json();
 }
 
-
-
 export async function fetchOptions() {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/options`);
   if (!res.ok) throw new Error('Failed to fetch options');
   return res.json();
 }
 
-export async function updateOptions(data: any) {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/options`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
+export async function updateOption(
+  type: "sePractice" | "claim",
+  oldValue: string,
+  newValue: string
+) {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/options/${type}/${encodeURIComponent(oldValue)}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ newValue }),
   });
-  if (!res.ok) throw new Error('Failed to update options');
+
+  if (!res.ok) {
+    throw new Error("Failed to update options");
+  }
+
+  return await res.json();
+}
+
+
+export async function addOption(type: 'sePractice' | 'claim', value: string) {
+  const res = await fetch(`${BACKEND_URL}/options`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type, value }),
+  });
+  if (!res.ok) throw new Error(`Failed to add ${type}`);
+  return res.json();
+}
+
+export async function deleteOption(type: 'sePractice' | 'claim', value: string) {
+  const res = await fetch(`${BACKEND_URL}/options/${type}/${encodeURIComponent(value)}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) throw new Error(`Failed to delete ${type}`);
   return res.json();
 }

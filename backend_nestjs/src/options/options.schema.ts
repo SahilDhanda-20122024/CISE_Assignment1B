@@ -7,7 +7,7 @@ export type OptionsDocument = Options & Document;
 @Schema()
 export class Options {
   @Prop({ type: [String], default: [] })
-  practices: string[];
+  sePractices: string[];
 
   @Prop({ type: [String], default: [] })
   claims: string[];
