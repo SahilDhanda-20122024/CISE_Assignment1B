@@ -27,6 +27,7 @@ const participantTypes = ['Professional Developers', 'Students', 'Mixed'];
 export default function AnalyzePage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loadingIndexes, setLoadingIndexes] = useState<number[]>([]);
+  const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadArticles() {
@@ -66,7 +67,13 @@ export default function AnalyzePage() {
         participantType: article.participantType,
         status: 'analyzed',
       });
-      alert('Analysis submitted');
+
+      // Remove the analyzed article from list
+      setArticles((prevArticles) => prevArticles.filter((_, i) => i !== index));
+
+      // Set confirmation message
+      setMessage(`Analysis submitted for "${article.title}"`);
+      setTimeout(() => setMessage(null), 4000);
     } catch (error) {
       console.error('Error submitting analysis:', error);
       alert('Failed to submit analysis');
@@ -82,6 +89,12 @@ export default function AnalyzePage() {
       <Link href="/" passHref>
         <button style={{ marginBottom: '20px' }}>← Back to Home</button>
       </Link>
+
+      {message && (
+        <p style={{ color: 'green', marginBottom: '20px' }}>
+          {message}
+        </p>
+      )}
 
       {articles.length === 0 ? (
         <p>No approved articles to analyze.</p>
