@@ -9,7 +9,8 @@ async function bootstrap() {
   app.enableCors({
     origin: 'https://cise-assignment1-b-iq5g-l7ykkb89g.vercel.app', // Replace with your Vercel domain
   });
-
-  await app.listen(process.env.PORT || 3000, '0.0.0.0');
+  const port = process.env.PORT || 4000;
+  await app.listen(port, '0.0.0.0');
+  console.log(`Server is running on http://0.0.0.0:${port}`);
 }
 bootstrap();
