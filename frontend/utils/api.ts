@@ -1,9 +1,23 @@
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
 
+if (!BACKEND_URL) {
+  throw new Error('Environment variable NEXT_PUBLIC_API_URL is not defined');
+}
+
+// Helper to handle fetch responses
+async function handleResponse(res: Response) {
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(errorText || 'Unknown API error');
+  }
+  return res.json();
+}
+
+// ------------------ Article API ------------------
+
 export async function fetchArticles() {
   const res = await fetch(`${BACKEND_URL}/articles`);
-  if (!res.ok) throw new Error('Failed to fetch articles');
-  return res.json();
+  return handleResponse(res);
 }
 
 export async function createArticle(article: any) {
@@ -12,8 +26,7 @@ export async function createArticle(article: any) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(article),
   });
-  if (!res.ok) throw new Error('Failed to create article');
-  return res.json();
+  return handleResponse(res);
 }
 
 export async function updateArticleStatus(id: string, status: string) {
@@ -22,48 +35,37 @@ export async function updateArticleStatus(id: string, status: string) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ status }),
   });
-  if (!res.ok) throw new Error('Failed to update article status');
-  return res.json();
+  return handleResponse(res);
 }
 
 export async function updateArticle(id: string, updatedData: any) {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/articles/${id}`, {
+  const res = await fetch(`${BACKEND_URL}/articles/${id}`, {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(updatedData),
   });
-  if (!res.ok) {
-    throw new Error('Failed to update article');
-  }
-  return await res.json();
+  return handleResponse(res);
 }
 
+// ------------------ Options API ------------------
+
 export async function fetchOptions() {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/options`);
-  if (!res.ok) throw new Error('Failed to fetch options');
-  return res.json();
+  const res = await fetch(`${BACKEND_URL}/options`);
+  return handleResponse(res);
 }
 
 export async function updateOption(
-  type: "sePractice" | "claim",
+  type: 'sePractice' | 'claim',
   oldValue: string,
   newValue: string
 ) {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/options/${type}/${encodeURIComponent(oldValue)}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
+  const res = await fetch(`${BACKEND_URL}/options/${type}/${encodeURIComponent(oldValue)}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ newValue }),
   });
-
-  if (!res.ok) {
-    throw new Error("Failed to update options");
-  }
-
-  return await res.json();
+  return handleResponse(res);
 }
-
 
 export async function addOption(type: 'sePractice' | 'claim', value: string) {
   const res = await fetch(`${BACKEND_URL}/options`, {
@@ -71,14 +73,12 @@ export async function addOption(type: 'sePractice' | 'claim', value: string) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ type, value }),
   });
-  if (!res.ok) throw new Error(`Failed to add ${type}`);
-  return res.json();
+  return handleResponse(res);
 }
 
 export async function deleteOption(type: 'sePractice' | 'claim', value: string) {
   const res = await fetch(`${BACKEND_URL}/options/${type}/${encodeURIComponent(value)}`, {
     method: 'DELETE',
   });
-  if (!res.ok) throw new Error(`Failed to delete ${type}`);
-  return res.json();
+  return handleResponse(res);
 }

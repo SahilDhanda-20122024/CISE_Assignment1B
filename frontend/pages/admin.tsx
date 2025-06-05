@@ -9,25 +9,40 @@ import {
   updateOption,
 } from "../utils/api";
 
+interface Article {
+  _id: string;
+  title: string;
+  authors: string;
+  journal: string;
+  sePractice?: string;
+  claim?: string;
+  result?: string;
+  researchType?: string;
+  participantType?: string;
+  status: "approved" | "rejected" | "analyzed";
+}
+
+interface Options {
+  sePractices: string[];
+  claims: string[];
+}
+
 export default function AdminPage() {
-  const [articles, setArticles] = useState<any[]>([]);
-  const [options, setOptions] = useState<{
-    sePractices: string[];
-    claims: string[];
-  }>({
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [options, setOptions] = useState<Options>({
     sePractices: [],
     claims: [],
   });
 
-  const [filterStatus, setFilterStatus] = useState("analyzed");
+  const [filterStatus, setFilterStatus] = useState<"approved" | "rejected" | "analyzed" | "any">("analyzed");
   const [searchTerm, setSearchTerm] = useState("");
 
   const [newPractice, setNewPractice] = useState("");
   const [newClaim, setNewClaim] = useState("");
 
   useEffect(() => {
-    fetchArticles().then((data) => {
-      const filtered = data.filter((a: any) =>
+    fetchArticles().then((data: Article[]) => {
+      const filtered = data.filter((a) =>
         ["approved", "rejected", "analyzed"].includes(a.status)
       );
       setArticles(filtered);
@@ -40,7 +55,7 @@ export default function AdminPage() {
     fetchOptions().then(setOptions);
   };
 
-  const handleChange = (id: string, field: string, value: string) => {
+  const handleChange = (id: string, field: keyof Article, value: string) => {
     setArticles((prev) =>
       prev.map((article) =>
         article._id === id ? { ...article, [field]: value } : article
@@ -48,7 +63,7 @@ export default function AdminPage() {
     );
   };
 
-  const handleSave = (article: any) => {
+  const handleSave = (article: Article) => {
     updateArticle(article._id, article);
   };
 
@@ -129,7 +144,13 @@ export default function AdminPage() {
           Filter by Status:{" "}
           <select
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
+            onChange={(e) =>
+              setFilterStatus(e.target.value as
+                | "approved"
+                | "rejected"
+                | "analyzed"
+                | "any")
+            }
           >
             <option value="any">Any</option>
             <option value="analyzed">Analyzed</option>
@@ -252,7 +273,10 @@ export default function AdminPage() {
                   <select
                     value={article.status}
                     onChange={(e) =>
-                      handleChange(article._id, "status", e.target.value)
+                      handleChange(article._id, "status", e.target.value as
+                        | "approved"
+                        | "rejected"
+                        | "analyzed")
                     }
                   >
                     <option value="approved">Approved</option>
@@ -292,7 +316,7 @@ export default function AdminPage() {
                 width: "250px",
               }}
             >
-              {options.sePractices.map((item, idx) => (
+              {options.sePractices.map((item) => (
                 <div
                   key={item}
                   style={{
