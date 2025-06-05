@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
-import Link from 'next/link';
-import { createArticle, fetchOptions } from '../utils/api';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import Link from "next/link";
+import { createArticle, fetchOptions } from "../utils/api";
 
 interface ArticleForm {
   title: string;
@@ -20,16 +20,16 @@ export default function SubmitPage() {
   const router = useRouter();
 
   const [form, setForm] = useState<ArticleForm>({
-    title: '',
-    authors: '',
-    journal: '',
-    year: '',
-    volume: '',
-    number: '',
-    pages: '',
-    doi: '',
-    sePractice: '',
-    claim: '',
+    title: "",
+    authors: "",
+    journal: "",
+    year: "",
+    volume: "",
+    number: "",
+    pages: "",
+    doi: "",
+    sePractice: "",
+    claim: "",
   });
 
   const [sePractices, setSePractices] = useState<string[]>([]);
@@ -45,7 +45,7 @@ export default function SubmitPage() {
         setSePractices(opts.sePractices || []);
         setClaims(opts.claims || []);
       } catch {
-        setError('Failed to load options');
+        setError("Failed to load options");
       } finally {
         setLoadingOptions(false);
       }
@@ -53,49 +53,57 @@ export default function SubmitPage() {
     loadOptions();
   }, []);
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
+  function handleChange(
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
   function isYearValid(year: string) {
-    return year === '' || /^\d{4}$/.test(year);
+    return year === "" || /^\d{4}$/.test(year);
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
     if (!isYearValid(form.year)) {
-      alert('Please enter a valid 4-digit year or leave blank.');
+      alert("Please enter a valid 4-digit year or leave blank.");
       return;
     }
 
     setSubmitting(true);
     try {
-      await createArticle({ ...form, status: 'pending' });
-      router.push('/');
+      await createArticle({
+        ...form,
+        status: "pending",
+        result: "pending", // Default value
+        researchType: "N/A", // Default value
+        participantType: "N/A", // Default value
+      });
+      router.push("/");
     } catch {
-      alert('Failed to submit article');
+      alert("Failed to submit article");
     } finally {
       setSubmitting(false);
     }
   }
 
   return (
-    <div style={{ padding: 30, maxWidth: 600, margin: 'auto' }}>
+    <div style={{ padding: 30, maxWidth: 600, margin: "auto" }}>
       <Link href="/" passHref>
         <button style={{ marginBottom: 20 }}>← Back to Home</button>
       </Link>
 
       <h1>Submit a New Article</h1>
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
 
       {loadingOptions ? (
         <p>Loading options...</p>
       ) : (
         <form
           onSubmit={handleSubmit}
-          style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
+          style={{ display: "flex", flexDirection: "column", gap: 12 }}
           noValidate
         >
           <input
@@ -190,7 +198,7 @@ export default function SubmitPage() {
           </select>
 
           <button type="submit" style={{ marginTop: 20 }} disabled={submitting}>
-            {submitting ? 'Submitting...' : 'Submit Article'}
+            {submitting ? "Submitting..." : "Submit Article"}
           </button>
         </form>
       )}
