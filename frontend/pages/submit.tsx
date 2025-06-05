@@ -1,24 +1,9 @@
 import { useState } from 'react';
-import { submitArticle } from '../utils/api';
 import { useRouter } from 'next/router';
+import { createArticle } from '../utils/api';
 
 export default function SubmitPage() {
   const router = useRouter();
-
-  const sePractices = [
-    "Test-Driven Development",
-    "Pair Programming",
-    "Code Reviews",
-    "Continuous Integration"
-  ];
-
-  const claims = [
-    "Improves code quality",
-    "Reduces bugs",
-    "Increases development speed",
-    "Improves team collaboration"
-  ];
-
   const [form, setForm] = useState({
     title: '',
     authors: '',
@@ -28,11 +13,16 @@ export default function SubmitPage() {
     number: '',
     pages: '',
     doi: '',
-    status: 'pending',
-    sePractice: 'Test Driven Development',
-    claim: 'Improves Code Quality',
-    result: 'unverified',
+    sePractice: '',
+    claim: '',
   });
+
+  const sePractices = ['TDD', 'Pair Programming', 'Code Review', 'Continuous Integration'];
+  const claims = [
+    'Improves Code Quality',
+    'Reduces Bugs',
+    'Enhances Collaboration',
+  ];
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -40,64 +30,43 @@ export default function SubmitPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    await submitArticle({
-      ...form,
-      year: Number(form.year) || undefined
-    });
-    router.push('/');
+    try {
+      await createArticle({ ...form, status: 'pending' });
+      router.push('/');
+    } catch (err) {
+      alert('Failed to submit article');
+    }
   }
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>Submit an Article</h1>
+    <div>
+      <h1>Submit a New Article</h1>
       <form onSubmit={handleSubmit}>
-        {[
-          { label: 'Title', name: 'title' },
-          { label: 'Authors', name: 'authors' },
-          { label: 'Journal', name: 'journal' },
-          { label: 'Year', name: 'year' },
-          { label: 'Volume', name: 'volume' },
-          { label: 'Number', name: 'number' },
-          { label: 'Pages', name: 'pages' },
-          { label: 'DOI', name: 'doi' },
-        ].map(field => (
-          <div key={field.name} style={{ marginBottom: '10px' }}>
-            <label>
-              {field.label}:{" "}
-              <input
-                type="text"
-                name={field.name}
-                value={(form as any)[field.name]}
-                onChange={handleChange}
-                required={["title", "authors", "journal", "doi"].includes(field.name)}
-              />
-            </label>
-          </div>
-        ))}
-
-        <div style={{ marginBottom: '10px' }}>
-          <label>
-            SE Practice:
-            <select name="sePractice" value={form.sePractice} onChange={handleChange}>
-              {sePractices.map((practice) => (
-                <option key={practice} value={practice}>{practice}</option>
-              ))}
-            </select>
-          </label>
-        </div>
-
-        <div style={{ marginBottom: '10px' }}>
-          <label>
-            Claim:
-            <select name="claim" value={form.claim} onChange={handleChange}>
-              {claims.map((claim) => (
-                <option key={claim} value={claim}>{claim}</option>
-              ))}
-            </select>
-          </label>
-        </div>
-
-        <button type="submit">Submit</button>
+        <input name="title" placeholder="Title" value={form.title} onChange={handleChange} required />
+        <input name="authors" placeholder="Authors" value={form.authors} onChange={handleChange} required />
+        <input name="journal" placeholder="Journal" value={form.journal} onChange={handleChange} required />
+        <input name="year" placeholder="Year" value={form.year} onChange={handleChange} />
+        <input name="volume" placeholder="Volume" value={form.volume} onChange={handleChange} />
+        <input name="number" placeholder="Number" value={form.number} onChange={handleChange} />
+        <input name="pages" placeholder="Pages" value={form.pages} onChange={handleChange} />
+        <input name="doi" placeholder="DOI" value={form.doi} onChange={handleChange} required />
+        <select name="sePractice" value={form.sePractice} onChange={handleChange} required>
+          <option value="">Select SE Practice</option>
+          {sePractices.map((practice) => (
+            <option key={practice} value={practice}>
+              {practice}
+            </option>
+          ))}
+        </select>
+        <select name="claim" value={form.claim} onChange={handleChange} required>
+          <option value="">Select Claim</option>
+          {claims.map((claim) => (
+            <option key={claim} value={claim}>
+              {claim}
+            </option>
+          ))}
+        </select>
+        <button type="submit">Submit Article</button>
       </form>
     </div>
   );
