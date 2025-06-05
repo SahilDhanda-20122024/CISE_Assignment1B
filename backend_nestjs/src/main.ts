@@ -7,7 +7,13 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: 'https://cise-assignment1-b-iq5g-l7ykkb89g.vercel.app', // Replace with your Vercel domain
+    origin: (origin, callback) => {
+      if (!origin || origin.endsWith('.vercel.app')) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
   });
   const port = process.env.PORT || 4000;
   await app.listen(port, '0.0.0.0');
