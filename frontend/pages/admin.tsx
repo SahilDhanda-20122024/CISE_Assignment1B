@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Link from "next/link"; 
+import Link from "next/link";
 import {
   fetchArticles,
   fetchOptions,
@@ -20,6 +20,7 @@ interface Article {
   researchType?: string;
   participantType?: string;
   status: "approved" | "rejected" | "analyzed";
+  tempStatus?: "approved" | "rejected" | "analyzed"; // new temp field
 }
 
 interface Options {
@@ -34,7 +35,9 @@ export default function AdminPage() {
     claims: [],
   });
 
-  const [filterStatus, setFilterStatus] = useState<"approved" | "rejected" | "analyzed" | "any">("analyzed");
+  const [filterStatus, setFilterStatus] = useState<
+    "approved" | "rejected" | "analyzed" | "any"
+  >("analyzed");
   const [searchTerm, setSearchTerm] = useState("");
 
   const [newPractice, setNewPractice] = useState("");
@@ -42,9 +45,9 @@ export default function AdminPage() {
 
   useEffect(() => {
     fetchArticles().then((data: Article[]) => {
-      const filtered = data.filter((a) =>
-        ["approved", "rejected", "analyzed"].includes(a.status)
-      );
+      const filtered = data
+        .filter((a) => ["approved", "rejected", "analyzed"].includes(a.status))
+        .map((a) => ({ ...a, tempStatus: a.status })); // copy status to tempStatus
       setArticles(filtered);
     });
 
@@ -64,7 +67,17 @@ export default function AdminPage() {
   };
 
   const handleSave = (article: Article) => {
-    updateArticle(article._id, article);
+    const updated = {
+      ...article,
+      status: article.tempStatus || article.status,
+    };
+    updateArticle(article._id, updated).then(() => {
+      setArticles((prev) =>
+        prev.map((a) =>
+          a._id === article._id ? { ...updated, tempStatus: updated.status } : a
+        )
+      );
+    });
   };
 
   // Editable option handlers for SE Practices and Claims
@@ -89,7 +102,10 @@ export default function AdminPage() {
     refreshOptions();
   };
 
-  const handleAddOption = async (type: "sePractice" | "claim", value: string) => {
+  const handleAddOption = async (
+    type: "sePractice" | "claim",
+    value: string
+  ) => {
     if (!value.trim()) return;
     await addOption(type, value.trim());
     refreshOptions();
@@ -145,11 +161,9 @@ export default function AdminPage() {
           <select
             value={filterStatus}
             onChange={(e) =>
-              setFilterStatus(e.target.value as
-                | "approved"
-                | "rejected"
-                | "analyzed"
-                | "any")
+              setFilterStatus(
+                e.target.value as "approved" | "rejected" | "analyzed" | "any"
+              )
             }
           >
             <option value="any">Any</option>
@@ -231,17 +245,19 @@ export default function AdminPage() {
                   {renderSelectWithCurrent(
                     article.claim,
                     options.claims,
-                    (e) =>
-                      handleChange(article._id, "claim", e.target.value),
+                    (e) => handleChange(article._id, "claim", e.target.value),
                     "Select Claim"
                   )}
                 </td>
                 <td>
                   {renderSelectWithCurrent(
                     article.result,
-                    ["Supports Claim", "Does Not Support Claim", "Inconclusive"],
-                    (e) =>
-                      handleChange(article._id, "result", e.target.value),
+                    [
+                      "Supports Claim",
+                      "Does Not Support Claim",
+                      "Inconclusive",
+                    ],
+                    (e) => handleChange(article._id, "result", e.target.value),
                     "Select Result"
                   )}
                 </td>
@@ -265,18 +281,23 @@ export default function AdminPage() {
                     article.participantType,
                     ["Students", "Professional Developers", "Mixed"],
                     (e) =>
-                      handleChange(article._id, "participantType", e.target.value),
+                      handleChange(
+                        article._id,
+                        "participantType",
+                        e.target.value
+                      ),
                     "Select Participant Type"
                   )}
                 </td>
                 <td>
                   <select
-                    value={article.status}
+                    value={article.tempStatus}
                     onChange={(e) =>
-                      handleChange(article._id, "status", e.target.value as
-                        | "approved"
-                        | "rejected"
-                        | "analyzed")
+                      handleChange(
+                        article._id,
+                        "tempStatus",
+                        e.target.value as "approved" | "rejected" | "analyzed"
+                      )
                     }
                   >
                     <option value="approved">Approved</option>
@@ -392,7 +413,9 @@ export default function AdminPage() {
                   <input
                     type="text"
                     defaultValue={item}
-                    onBlur={(e) => handleOptionEdit("claim", item, e.target.value)}
+                    onBlur={(e) =>
+                      handleOptionEdit("claim", item, e.target.value)
+                    }
                     style={{ flexGrow: 1 }}
                   />
                   <button
