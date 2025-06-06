@@ -136,14 +136,14 @@ export default function AdminPage() {
     );
   }
 
-  const filteredArticles = articles.filter((a) => {
-    const matchesStatus = filterStatus === "any" || a.status === filterStatus;
-    const search = searchTerm.toLowerCase();
-    const matchesSearch =
+  const filteredArticles = articles.filter((a) => {         //retrieves all articles from the backend and
+    const matchesStatus = filterStatus === "any" || a.status === filterStatus;  //filters articles by the currently selected filter status from dropdown
+    const search = searchTerm.toLowerCase();                //further filters article by terms in search bar
+    const matchesSearch =                                   //if any terms in the search bar are loosely contained in any title, author, or journal
       a.title?.toLowerCase().includes(search) ||
       a.authors?.toLowerCase().includes(search) ||
       a.journal?.toLowerCase().includes(search);
-    return matchesStatus && matchesSearch;
+    return matchesStatus && matchesSearch;                  //shows only article with the correct status and search terms
   });
 
   return (
@@ -154,10 +154,12 @@ export default function AdminPage() {
         <button style={{ marginBottom: "20px" }}>← Back to Home</button>
       </Link>
 
+      
       {/* Filter & Search */}
+      {/* Creates a dropdown list for the status filter */}
       <div style={{ marginBottom: "20px", display: "flex", gap: "20px" }}>
         <label>
-          Filter by Status:{" "}
+          Filter by Status:{" "}                                                   
           <select
             value={filterStatus}
             onChange={(e) =>
